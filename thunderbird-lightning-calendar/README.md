@@ -1,22 +1,20 @@
 # Read calender Thunderbird (Lightning)
 
 ```bash
-$ ./thunderbird_calendar.sh 
-02.02.2019 Fasching
-03.02.2019 [22:00] Super Bowl
-06.02.2019 [16:00] Sonntags Netzwerk
-15.02.2019 Geburtstag Papa
-17.02.2019 Geburtstag Stefan
-23.02.2019 [12:00] Campen Wuppertal
-01.03.2019 [18:00] Poker bei Maik Ludewig [22:00] Naddel
-08.03.2019 [00:00] Frauentag (§) [16:00] Ölwechsel
+$ ./thunderbird_calendar.sh -d 2019.04.01-1m:2m
+[INFO] BEGIN: Fri Mar  1 00:00:00 CET 2019
+[INFO] END:   Tue Apr 30 23:59:59 CEST 2019
+01.03.2019 [18:00] Poker [22:00] Naddel
+08.03.2019 [16:00] Ölwechsel [=] Frauentag (§)
 17.03.2019 [18:00] Filmabend
-22.03.2019 Camping Wuppertalsperre
-23.03.2019 Camping Wuppertalsperre
-24.03.2019 Camping Wuppertalsperre
+22.03.2019 [~] Camping
+23.03.2019 [~] Camping
+24.03.2019 [~] Camping
 25.03.2019 [17:00] Bierchen mit Thomas
-13.04.2019 Quad-Tour
-18.04.2019 [00:00] Gründonnerstag
-19.04.2019 [00:00] Karfreitag (§)
-22.04.2019 [00:00] Ostermontag (§)
+18.04.2019 [=] Gründonnerstag
+19.04.2019 [10:00] Quad-Tour [=] Karfreitag (§)
+22.04.2019 [=] Ostermontag (§)
+27.04.2019 [~] Campen [~] Fontane Rallye
+28.04.2019 [~] Campen
 ```
+
