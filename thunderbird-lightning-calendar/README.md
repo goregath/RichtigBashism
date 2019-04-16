@@ -1,5 +1,32 @@
 # Read calender Thunderbird (Lightning)
 
+```plain
+thunderbird_calendar.sh [-d [DATE][OFFSET]:LENGTH] [-h]
+  -d, --date    Query calendar around this date. 
+                Defaults to today
+  -h, --help    Display this message and exit
+
+  DATE    First form:  YYYY.MM.DD
+          Second form: (f|l)o(d|w|m|y)
+          ┌──────────┬───────┬───────┬───────┬───────┐
+          │          │ Day   │ Week  │ Month │ Year  │
+          ├──────────┼───────┼───────┼───────┼───────┤
+          │ First of │ fod   │ fow   │ fom   │ foy   │
+          │ Last of  │ lod   │ low   │ lom   │ loy   │
+          └──────────┴───────┴───────┴───────┴───────┘
+  OFFSET  (-|+)NUM[UNIT]
+  LENGTH  [-|+]NUM[UNIT]
+  NUM     A signed integer
+  UNIT    y: Year, m: Month, w: Week, d: Day (default)
+
+EXAMPLES:
+  Query events starting one month before and after a date
+  $ thunderbird_calendar.sh -d 2020.01.01-1m:2m
+
+  Query events for one weak starting at a date
+  $ thunderbird_calendar.sh -d 2019.03.01:1w
+```
+
 ```bash
 $ ./thunderbird_calendar.sh -d 2019.04.01-1m:2m
 [INFO] BEGIN: Fri Mar  1 00:00:00 CET 2019
