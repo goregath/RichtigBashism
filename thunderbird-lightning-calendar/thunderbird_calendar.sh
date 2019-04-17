@@ -12,6 +12,7 @@ DB_BASE_DIR=~/.thunderbird/ivloaq67.default/calendar-data
 UDAY_S=86400
 
 REG_YEAR="[1-9][0-9]{3}\.(0[1-9]|1[0-2])\.([0-2][0-9]|3[0-1])"
+REG_STR="[fl]o[dwmy]"
 REG_OFFSET="[+-][1-9][0-9]*[dwmy]?"
 REG_LENGTH="[+-]?[1-9][0-9]*[dwmy]?"
 
@@ -52,14 +53,18 @@ set_colors() {
 					CLR_MGT="$($tput setaf 5)"
 					CLR_CYN="$($tput setaf 6)"
 					CLR_WHT="$($tput setaf 7)"
-					_ANSI_CTRL=( $(printf '%q\n' \
-						"$MOD_REV" "$MOD_BLD" \
-						"$MOD_UDL" "$MOD_STO" \
-						"$MOD_RST" \
-						"$CLR_BLK" "$CLR_RED" \
-						"$CLR_GRN" "$CLR_YLW" \
-						"$CLR_BLU" "$CLR_MGT" \
-						"$CLR_CYN" "$CLR_WHT" ) )
+					_ANSI_CTRL=( 
+						$(printf '%b' \
+						"$MOD_REV"'\0\0'"$MOD_BLD"'\0\0'\
+						"$MOD_UDL"'\0\0'"$MOD_STO"'\0\0'\
+						"$MOD_RST"'\0\0'\
+						"$CLR_BLK"'\0\0'"$CLR_RED"'\0\0'\
+						"$CLR_GRN"'\0\0'"$CLR_YLW"'\0\0'\
+						"$CLR_BLU"'\0\0'"$CLR_MGT"'\0\0'\
+						"$CLR_CYN"'\0\0'"$CLR_WHT" \
+						| hexdump -ve '1/1 "%.2X"'\
+						| sed -e 's/0000/ /g')
+					)
 				fi
 				;;
 		esac
@@ -99,62 +104,27 @@ log() {
 	prefix="[${lvl}] "
 	out="${ansi_ctl}${prefix}${_tag}${MOD_RST}${*:$mi}"
 
-	local nctl nesc nout
-	nout=${#out}
-	nesc=$(
-		IFS=,
-		eval <<<"$out" "sed $(eval echo '" -e'"'"'s#"{'"${_ANSI_CTRL[*]}}"'"##g'"'"'"' | \
-		sed -e's/[\/\[&]/\&/g')" | \
-		wc -m
-	)
-	nctl=$(( nout - nesc ))
+	while read out; do
+		local nctl nesc nout
+		nout=${#out}
+		nesc=$(
+			hd="$(hexdump -ve '1/1 "%.2X"' <<<"$out")"
+			for m in ${_ANSI_CTRL[*]}; do
+				hd="${hd//$m/}"
+			done
+			str="$(xxd -r -p <<<"$hd")"
+			echo "${#str}"
+		)
+		nctl=$(( nout - nesc ))
 
-	exec 99>&$rd
-	if [[ -n ${COLUMNS+x} ]] && (( ( nout - nctl ) > $COLUMNS )); then
-		echo $args "${out:0:$((COLUMNS+nctl-2))} ${MOD_BLD}${CLR_GRN}${MOD_REV}>|${MOD_RST}" >&99
-	else
-		echo $args "$out" >&99
-	fi
+		exec 99>&$rd
+		if [[ -n ${COLUMNS+x} ]] && (( ( nout - nctl ) > $COLUMNS )); then
+			echo $args "${out:0:$((COLUMNS+nctl-3))} ${MOD_BLD}${CLR_GRN}${MOD_REV}>|${MOD_RST}" >&99
+		else
+			echo $args "$out" >&99
+		fi
+	done <<<"$out"
 }
-
-set -e
-set -o pipefail
-
-# log() {
-# 	# USAGE log [ARGS --] [!]LVL MSG
-# 	#    ARGS    arguments passed to printer.
-# 	#    LVL     log prefix '!', omits print
-# 	#    MSG     the content
-# 	local args='-e' ll=1 mi=2 i=$#
-# 	for (( ; i > 0; --i )); do
-# 		if [[ "${!i}" == '--' ]]; then
-# 			ll=$((i+1))
-# 			mi=$((i+2))
-# 			local el=$((i-1))
-# 			args=${@:1:$el}
-# 			break
-# 		fi
-# 	done
-# 	local lvl="${!ll^^}" prefix
-# 	case ${lvl:0:1} in
-# 		'!' )
-# 			;;
-# 	esac
-# 	if [[ ${lvl:0:1} == '!' ]]; then
-# 		prefix=
-# 		lvl=${lvl:1}
-# 	else
-# 		prefix="${lvl}: "
-# 	fi
-# 	case "$lvl" in
-# 		DEBUG )
-# 			[[ -n ${DEBUG+x} ]] && echo ${args} "${prefix}${@:$mi}" >&2 || true
-# 			;;
-# 		* )
-# 			echo ${args} "${prefix}${@:$mi}" >&2
-# 			;;
-# 	esac
-# }
 
 # Day;Week;Month;Year
 # First of;fod;fow;fom;foy
@@ -219,13 +189,13 @@ help() {
 }
 
 parse_spec() {
-	local sign value unit
 	# [-|+]value[unit]
 	if [[ -z ${1:+x} ]]; then
 		log WARN "cannot parse empty argument spec"
 		return 0
 	fi
 	if [[ "$1" =~ ^([+-]?)(0|[1-9][0-9]*)([dwmy]?)$ ]]; then
+		local sign value unit
 		sign="${BASH_REMATCH[1]}"
 		value="${BASH_REMATCH[2]}"
 		if (( value == 0 )); then
@@ -334,6 +304,10 @@ process_db_out() {
 }
 process() { process_db_out; }
 
+set -e
+set -o pipefail
+set_colors
+
 for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	opt="${!o}"
 	arg="${!a}"
@@ -356,6 +330,28 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 					begin_ns="$(date -d "${pivot_date//./} $(parse_spec $offset)" +%s)000000"
 					end_ns="$(date -d "${pivot_date//./} $(parse_spec $offset) $(parse_spec $length) -1 second" +%s)999999"
 					((o++))
+				elif [[ "$arg" =~ ^($REG_STR)($REG_OFFSET)?(:$REG_LENGTH)?$ ]]; then
+					echo matched
+					pivot_date="${BASH_REMATCH[1]}"
+					# date -d '20190401 00:00:01.99'
+					# lod: date -d "$(date +%Y%m%d) -1 second +1 day" "+%Y%m%d %H:%M:%S"
+					# fow: date -d "$(date -d yesterday +%u) days ago" +%Y%m%d
+					# lom: date -d "$(date +%Y%m01) -1 second +1 month" +%Y%m%d
+					case $pivot_date in
+						fom )
+							
+							;;
+					esac
+					offset="${BASH_REMATCH[4]:-"$OFFSET_DEFAULT"}"
+					length="${BASH_REMATCH[5]:1}"
+					length="${length:-$LENGTH_DEFAULT}"
+					begin_ns="$(date -d "${pivot_date} $(parse_spec $offset)" +%s)000000"
+					end_ns="$(date -d "${pivot_date} $(parse_spec $offset) $(parse_spec $length) -1 second" +%s)999999"
+					# [[ "$1" =~ ^([fl])o([dwmy])$ ]]; then
+					# local at unit
+					# at="${BASH_REMATCH[1]}"
+					# unit="${BASH_REMATCH[2]}"
+					((o++))
 				fi
 			;;
 		* )
@@ -364,9 +360,9 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	esac
 done
 
-set_colors
-
 log INFO "BEGIN: $(date -d @"$((begin_ns / 1000000))")" >&2
 log INFO "END:   $(date -d @"$((end_ns / 1000000))")" >&2
+log INFO veryloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line
+log INFO veryloooooooooooooooooooooooooooooooooooooooooo$'\n'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong$'\n'lineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 
 get_events ${DB_BASE_DIR}/{cache,local}.sqlite | process
