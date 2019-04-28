@@ -12,7 +12,7 @@ DB_BASE_DIR=~/.thunderbird/ivloaq67.default/calendar-data
 UDAY_S=86400
 
 REG_YEAR="[1-9][0-9]{3}\.(0[1-9]|1[0-2])\.([0-2][0-9]|3[0-1])"
-REG_STR="[fl]o[dwmy]"
+REG_STR="fo[wmy]"
 REG_OFFSET="[+-][1-9][0-9]*[dwmy]?"
 REG_LENGTH="[+-]?[1-9][0-9]*[dwmy]?"
 
@@ -167,12 +167,13 @@ help() {
 	  -h, --help    Display this message and exit
 
 	  DATE    First form:  YYYY.MM.DD
-	          Second form: (f|l)o(d|w|m|y)
+	          Second form: fo(w|m|y)
 	$(table_csv <<< '
-		        ;Day  ;Week ;Month;Year 
-		First of;fod  ;fow  ;fom  ;foy  
-		Last of ;lod  ;low  ;lom  ;loy  
+		        ;Week ;Month;Year 
+		First of;fow  ;fom  ;foy  
 	' | indent 10)
+	          Note: First of week is defined as monday.
+
 	  OFFSET  (-|+)NUM[UNIT]
 	  LENGTH  [-|+]NUM[UNIT]
 	  NUM     A signed integer
@@ -331,19 +332,21 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 					end_ns="$(date -d "${pivot_date//./} $(parse_spec $offset) $(parse_spec $length) -1 second" +%s)999999"
 					((o++))
 				elif [[ "$arg" =~ ^($REG_STR)($REG_OFFSET)?(:$REG_LENGTH)?$ ]]; then
-					echo matched
+					echo "${BASH_REMATCH[@]}"
 					pivot_date="${BASH_REMATCH[1]}"
-					# date -d '20190401 00:00:01.99'
-					# lod: date -d "$(date +%Y%m%d) -1 second +1 day" "+%Y%m%d %H:%M:%S"
-					# fow: date -d "$(date -d yesterday +%u) days ago" +%Y%m%d
-					# lom: date -d "$(date +%Y%m01) -1 second +1 month" +%Y%m%d
 					case $pivot_date in
-						fom )
-							
+						fow )
+								if [[ $(date +%u) == 1 ]]; then
+									pivot_date="$(date +%Y%m%d)"
+								else
+									pivot_date="$(date -d "$(date -d yesterday +%u) days ago" +%Y%m%d)"
+								fi
 							;;
+						fom ) pivot_date="$(date +%Y%m01)"; ;;
+						foy ) pivot_date="$(date +%Y0101)"; ;;
 					esac
-					offset="${BASH_REMATCH[4]:-"$OFFSET_DEFAULT"}"
-					length="${BASH_REMATCH[5]:1}"
+					offset="${BASH_REMATCH[2]:-"$OFFSET_DEFAULT"}"
+					length="${BASH_REMATCH[3]:1}"
 					length="${length:-$LENGTH_DEFAULT}"
 					begin_ns="$(date -d "${pivot_date} $(parse_spec $offset)" +%s)000000"
 					end_ns="$(date -d "${pivot_date} $(parse_spec $offset) $(parse_spec $length) -1 second" +%s)999999"
@@ -360,9 +363,8 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	esac
 done
 
+
 log INFO "BEGIN: $(date -d @"$((begin_ns / 1000000))")" >&2
 log INFO "END:   $(date -d @"$((end_ns / 1000000))")" >&2
-log INFO veryloooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong line
-log INFO veryloooooooooooooooooooooooooooooooooooooooooo$'\n'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong$'\n'lineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 
 get_events ${DB_BASE_DIR}/{cache,local}.sqlite | process
