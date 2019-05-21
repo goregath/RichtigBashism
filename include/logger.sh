@@ -3,8 +3,6 @@
 [[ -n ${__LIB_LOGGER__+x} ]] && return 0
 __LIB_LOGGER__=y
 
-echo include logger
-
 __set_colors__() {
 	# usage tag=<TAG> log <LEVEL> <MSG>
 	# set colors if available
