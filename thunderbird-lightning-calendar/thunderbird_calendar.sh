@@ -46,9 +46,9 @@ include() {
 	lib="$1"
 	nl=$'\n'
 	search <<-SOURCES
-	.
-	${SCRIPTPATH}
-	${BASH_INCLUDES//:/$nl}
+		${BASH_INCLUDES//:/$nl}
+		.
+		${SCRIPTPATH}
 	SOURCES
 }
 

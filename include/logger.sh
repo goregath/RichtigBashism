@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+[[ -n ${__LIB_LOGGER__+x} ]] && return 0
+__LIB_LOGGER__=y
+
+echo include logger
+
 set_colors() {
 	# usage tag=<TAG> log <LEVEL> <MSG>
 	# set colors if available

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+[[ -n ${__LIB_HANDLR_+x} ]] && return 0
+__LIB_HANDLR_=y
+
 ## This function should be called right before the shell will exit.
 ## Its main purpose is to perform cleanup tasks.
 ## 
