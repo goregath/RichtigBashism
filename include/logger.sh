@@ -5,7 +5,7 @@ __LIB_LOGGER__=y
 
 echo include logger
 
-set_colors() {
+__set_colors__() {
 	# usage tag=<TAG> log <LEVEL> <MSG>
 	# set colors if available
 	if [[ -t 1 ]]; then
@@ -103,4 +103,4 @@ log() {
 }
 
 shopt -s checkwinsize
-set_colors
+__set_colors__
