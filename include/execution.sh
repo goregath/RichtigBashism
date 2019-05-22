@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+## Module: Script lifecycle utils
+##
+## @file
+## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
+## @date                2019-05-22 12:44:47
+##
+## Last Modified time:  2019-05-22 12:46:33
+## Last Modified by:    GoreGath
+
 [[ -n ${__LIB_EXECUTION__+x} ]] && return 0
 __LIB_EXECUTION__=y
 
