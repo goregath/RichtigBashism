@@ -89,24 +89,25 @@ on_exit() {
 ##
 ## @see setup()
 on_error() {
-	local source flags code line command msg= dump=
+	local TAG_PID source flags code line command msg= dump=
 	source="$1"
 	flags="$2"
 	code="$3"
 	line="$4"
 	command="$5"
+	TAG_PID=( "$$" )
 	if ! hash column >/dev/null 2>&1; then
 		column() { cat -n; }
 	fi
 	if ! hash sed >/dev/null 2>&1; then
 		sed() { cat; }
 	fi
-	log ERROR "[$source]: ${command} on line $line failed with $code [$flags]"
 	for (( f=1, l=0; f < ${#FUNCNAME[@]}; f++,l++ )); do
 		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]}" "${BASH_SOURCE[$f]}:${BASH_LINENO[$l]}"
 		msg+="$dump"
 	done
-	log INFO "trace log:${msg}"
+
+	tag=pid log ERROR "[$source]:"$'\n'"${command} on line $line failed with $code [$flags]${msg}"
 	msg="$(set -o | grep 'on$' | column -t | sed 's/^/  /')"
 	log DEBUG "Bourne shell options:"$'\n'"${msg}"
 	msg="$(shopt | grep 'on$' | column -t | sed 's/^/  /')"
