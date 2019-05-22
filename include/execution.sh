@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-05-22 12:46:33
+## Last Modified time:  2019-05-22 15:09:22
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_EXECUTION__+x} ]] && return 0
@@ -26,8 +26,8 @@ __LIB_EXECUTION__=y
 on_exit() {
 	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
 	log INFO "press enter to exit"
-	read || :
-	if [[ $(LC_ALL=C type -t execution::teardown) == 'function' ]]; then
+	read -s || :
+	if [[ "$(LC_ALL=C type -t execution::teardown)" == 'function' ]]; then
 		execution::teardown
 	else
 		log WARN 'missing execution::teardown()'
@@ -138,7 +138,7 @@ __setup__() {
 	if [[ -n ${-//[^x]/} ]]; then
 		export DEBUG=true
 	fi
-	if [[ $(LC_ALL=C type -t execution::setup) == 'function' ]]; then
+	if [[ "$(LC_ALL=C type -t execution::setup)" == 'function' ]]; then
 		execution::setup
 	else
 		log WARN 'missing execution::setup()'
