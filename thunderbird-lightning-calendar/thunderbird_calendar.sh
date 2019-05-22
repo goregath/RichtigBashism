@@ -243,7 +243,7 @@ for (( o=1; o < $# + 1; ++o )); do
 	esac
 done
 
-include include/handler.sh
+include include/execution.sh
 include include/logger.sh
 
 for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
