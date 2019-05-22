@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-05-22 12:28:44
+## Last Modified time:  2019-05-22 12:39:01
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_LOGGER__+x} ]] && return 0
@@ -28,6 +28,8 @@ __LIB_LOGGER__=y
 ##   - CLR_CYN
 ##   - CLR_WHT
 ## @fn __set_colors__()
+## @depends hexdump (bsdmainutils)
+## @depends tput (ncurses-bin)
 ##
 ## @return undefined
 __set_colors__() {
@@ -114,6 +116,8 @@ __set_colors__() {
 ##     # [INFO] Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonu >|
 ## ~~~
 ## @fn log()
+## @depends hexdump (bsdmainutils)
+## @depends xxd (vim-common)
 ##
 ## @param level Logging level
 ## @param ... Message args, each argument is printed as a new log line 
