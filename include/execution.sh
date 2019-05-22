@@ -18,10 +18,10 @@ on_exit() {
 	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
 	log INFO "press enter to exit"
 	read || :
-	if [[ $(LC_ALL=C type -t teardown) == 'function' ]]; then
-		teardown
+	if [[ $(LC_ALL=C type -t execution::teardown) == 'function' ]]; then
+		execution::teardown
 	else
-		log WARN 'missing teardown()'
+		log WARN 'missing execution::teardown()'
 	fi
 	exit ${code}
 }
@@ -129,10 +129,10 @@ __setup__() {
 	if [[ -n ${-//[^x]/} ]]; then
 		export DEBUG=true
 	fi
-	if [[ $(LC_ALL=C type -t setup) == 'function' ]]; then
-		setup
+	if [[ $(LC_ALL=C type -t execution::setup) == 'function' ]]; then
+		execution::setup
 	else
-		log WARN 'missing setup()'
+		log WARN 'missing execution::setup()'
 	fi
 }
 
