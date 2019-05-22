@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-05-22 12:46:26
+## Last Modified time:  2019-05-22 14:21:30
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_LOGGER__+x} ]] && return 0
@@ -159,8 +159,7 @@ log() {
 	for (( i = mi; i < ${#@} + 1; i++ )); do
 		prefix="[${lvl}] "
 		out="${ansi_ctl}${prefix}${_tag}${MOD_RST}${!i}"
-
-		while read out; do
+		while IFS= read -r out; do
 			local nctl nesc nout
 			nout=${#out}
 			nesc=$(
