@@ -6,18 +6,25 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:07
 ##
-## Last Modified time:  2019-05-22 12:46:21
+## Last Modified time:  2019-05-22 12:52:24
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_WEB__+x} ]] && return 0
 __LIB_WEB__=y
 
 ## Echo description for Http status code.
+##
+## ### Example
+##
+## ~~~{sh}
+##     http_status_str 404
+##     # Not Found
+## ~~~
 ## @fn http_status_str()
 ##
 ## @param code Http status code
 ##
-## @return undefined
+## @return 0
 http_status_str() {
 	local code=$1 descr
 	case "$code" in

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-## Module: Advanced (colorized) logger
+## Module: Advanced (colorized) logger utils
 ##
 ## @file
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-05-22 12:39:01
+## Last Modified time:  2019-05-22 12:46:26
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_LOGGER__+x} ]] && return 0
