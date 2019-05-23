@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-05-22 14:21:30
+## Last Modified time:  2019-05-22 16:13:46
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_LOGGER__+x} ]] && return 0
@@ -112,7 +112,7 @@ __set_colors__() {
 ## ~~~{sh}
 ##     echo $COLUMNS
 ##     # 80
-##     log INFO 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.''
+##     log INFO 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 ##     # [INFO] Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonu >|
 ## ~~~
 ## @fn log()
