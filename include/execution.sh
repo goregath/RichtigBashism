@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-05-23 10:12:24
+## Last Modified time:  2019-05-24 09:45:26
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_EXECUTION__+x} ]] && return 0
@@ -95,7 +95,7 @@ on_error() {
 	code="$3"
 	line="$4"
 	command="$5"
-	TAG_PID=( "$$" )
+	TAG_PID=( $$ ${BASHPID/#$$/} )
 	if ! hash column >/dev/null 2>&1; then
 		column() { cat -n; }
 	fi
@@ -106,7 +106,6 @@ on_error() {
 		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]}" "${BASH_SOURCE[$f]}:${BASH_LINENO[$l]}"
 		msg+="$dump"
 	done
-
 	tag=pid log ERROR "[$source]:"$'\n'"${command} on line $line failed with $code [$flags]${msg}"
 	msg="$(set -o | grep 'on$' | column -t | sed 's/^/  /')"
 	log DEBUG "Bourne shell options:"$'\n'"${msg}"
