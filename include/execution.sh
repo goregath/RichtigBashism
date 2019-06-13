@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-05-24 09:45:26
+## Last Modified time:  2019-06-13 10:55:49
 ## Last Modified by:    GoreGath
 
 [[ -n ${__LIB_EXECUTION__+x} ]] && return 0
@@ -22,10 +22,10 @@ __LIB_EXECUTION__=y
 ##
 ## @return undefined
 ##
-## @see setup()
+## @see __setup__()
 on_exit() {
 	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
-	log INFO "press enter to exit"
+	LOG_LEVEL=info log INFO "press enter to exit"
 	read -s || :
 	if [[ "$(LC_ALL=C type -t execution::teardown)" == 'function' ]]; then
 		execution::teardown
@@ -87,7 +87,7 @@ on_exit() {
 ##
 ## @return undefined
 ##
-## @see setup()
+## @see __setup__()
 on_error() {
 	local TAG_PID source flags code line command msg= dump=
 	source="$1"
