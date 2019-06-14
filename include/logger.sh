@@ -17,7 +17,7 @@
 
 [[ -n ${__LIB_LOGGER__:+x} ]] && return 0
 export __LIB_LOGGER__=y
-__LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG"
+__LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG ALL"
 
 ## If possible set color sequences to tags.
 ## Supported tags are:
@@ -85,7 +85,7 @@ __set_colors__() {
 ## @param ... Levels in descending order
 ##
 ## @return 0
-set_log_levels_desc() {
+logger::set_log_levels_desc() {
 	__LIB_LOGGER_LVLS_="$@"
 }
 
