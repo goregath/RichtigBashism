@@ -177,7 +177,6 @@ null_print() {
 
 read_db() {
 	for dbfile in "$@"; do
-		false
 		sqlite3 "$dbfile" '
 			SELECT title, event_start, event_end, event_stamp
 				FROM cal_events 
@@ -241,8 +240,8 @@ for (( o=1; o < $# + 1; ++o )); do
 	esac
 done
 
-include include/execution.sh
 include include/logger.sh
+include include/execution.sh
 
 for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	opt="${!o}"
