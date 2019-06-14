@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## Module: Advanced (colorized) logger
+## Module: Advanced (colorized) logger utils
 ##
 ## @file
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
@@ -11,6 +11,7 @@
 
 [[ -n ${__LIB_LOGGER__:+x} ]] && return 0
 export __LIB_LOGGER__=y
+__LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG"
 
 ## If possible set color sequences to tags.
 ## Supported tags are:
@@ -72,13 +73,17 @@ __set_colors__() {
 	fi
 }
 
-## Advanced logger with colors if supported by terminal.
+## Set all levels in descending order.
+## @fn set_log_levels_desc()
 ##
-## Known log levels are:
-##   - `DEBUG`
-##   - `INFO`
-##   - `WARN`
-##   - `ERR`(`OR`)
+## @param ... Levels in descending order
+##
+## @return 0
+set_log_levels_desc() {
+	__LIB_LOGGER_LVLS_="$@"
+}
+
+## Advanced logger with colors if supported by terminal.
 ##
 ## All known levels share the same output stream (`STDERR`) by default.
 ## The messages for "DEBUG" are only printed if the varaiable `DEBUG` is 
@@ -112,7 +117,7 @@ __set_colors__() {
 ## ~~~{sh}
 ##     echo $COLUMNS
 ##     # 80
-##     log INFO 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.''
+##     log INFO 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.'
 ##     # [INFO] Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonu >|
 ## ~~~
 ## @fn log()
@@ -124,9 +129,10 @@ __set_colors__() {
 ##
 ## @return undefined
 ##
-## @see DEBUG
+## @see set_log_levels_desc
 log() {
 	local _tag args i=$# ll=1 mi=2 rd=1
+	# supported levels in order of importance (desc)
 	for (( ; i > 0; --i )); do
 		if [[ "${!i}" == '--' ]]; then
 			ll=$((i+1))
@@ -138,8 +144,18 @@ log() {
 	done
 
 	local ansi_ctl lvl="${!ll^^}" out prefix
+
+	if [[ -n ${LOG_LEVEL:+x} ]] \
+		&& ! [[ $LOG_LEVEL == $lvl ]] \
+		&& ! [[ "${__LIB_LOGGER_LVLS_%"${LOG_LEVEL}"*}" =~ "$lvl " ]]
+	then
+		# skip log if lvl is lower than LOG_LEVEL
+		return
+	fi
+
+
 	case "$lvl" in
-		DEBUG )  [[ -z ${DEBUG:+x} ]] && return; rd=2; ;;
+		DEB*  )  rd=2; ;;
 		ERR*  )  rd=2; ansi_ctl="${MOD_BLD}${CLR_RED}" ;;
 		INFO* )  rd=2; ansi_ctl="${MOD_BLD}${CLR_CYN}" ;;
 		WARN* )  rd=2; ansi_ctl="${MOD_BLD}${CLR_YLW}" ;;
@@ -159,8 +175,7 @@ log() {
 	for (( i = mi; i < ${#@} + 1; i++ )); do
 		prefix="[${lvl}] "
 		out="${ansi_ctl}${prefix}${_tag}${MOD_RST}${!i}"
-
-		while read out; do
+		while IFS= read -r out; do
 			local nctl nesc nout
 			nout=${#out}
 			nesc=$(

@@ -22,14 +22,14 @@ export __LIB_EXECUTION__=y
 ##
 ## @return undefined
 ##
-## @see setup()
+## @see __setup__()
 on_exit() {
 	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
 	if [[ ${__LIB_EXECUTION_CONFIRM_ON_EXIT_:-x} == y ]]; then
 		log INFO "press enter to exit"
 		read || :
 	fi
-	if [[ $(LC_ALL=C type -t execution::teardown) == 'function' ]]; then
+	if [[ "$(LC_ALL=C type -t execution::teardown)" == 'function' ]]; then
 		execution::teardown
 	else
 		log WARN 'missing execution::teardown()'
@@ -89,26 +89,26 @@ on_exit() {
 ##
 ## @return undefined
 ##
-## @see setup()
+## @see __setup__()
 on_error() {
-	local source flags code line command msg= dump=
+	local TAG_PID source flags code line command msg= dump=
 	source="$1"
 	flags="$2"
 	code="$3"
 	line="$4"
 	command="$5"
+	TAG_PID=( $$ ${BASHPID/#$$/} )
 	if ! hash column >/dev/null 2>&1; then
 		column() { cat -n; }
 	fi
 	if ! hash sed >/dev/null 2>&1; then
 		sed() { cat; }
 	fi
-	log ERROR "[$source]: ${command} on line $line failed with $code [$flags]"
 	for (( f=1, l=0; f < ${#FUNCNAME[@]}; f++,l++ )); do
 		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]}" "${BASH_SOURCE[$f]}:${BASH_LINENO[$l]}"
 		msg+="$dump"
 	done
-	log INFO "trace log:${msg}"
+	tag=pid log ERROR "[$source]:"$'\n'"${command} on line $line failed with $code [$flags]${msg}"
 	msg="$(set -o | grep 'on$' | column -t | sed 's/^/  /')"
 	log DEBUG "Bourne shell options:"$'\n'"${msg}"
 	msg="$(shopt | grep 'on$' | column -t | sed 's/^/  /')"
@@ -130,7 +130,7 @@ __setup__() {
 	if [[ $(LC_ALL=C type -t log) != 'function' ]]; then
 		log() { echo "$@"; }
 	fi
-	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "\"$BASH_COMMAND\""' ERR
+	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "'\''$BASH_COMMAND'\''"' ERR
 	trap 'on_exit' EXIT
 	set -o pipefail
 	shopt -s extglob
@@ -144,7 +144,7 @@ __setup__() {
 	if [[ -n ${-//[^x]/} ]]; then
 		export DEBUG=true
 	fi
-	if [[ $(LC_ALL=C type -t execution::setup) == 'function' ]]; then
+	if [[ "$(LC_ALL=C type -t execution::setup)" == 'function' ]]; then
 		execution::setup
 	else
 		log WARN 'missing execution::setup()'

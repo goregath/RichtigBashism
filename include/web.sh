@@ -13,11 +13,18 @@
 export __LIB_WEB__=y
 
 ## Echo description for Http status code.
+##
+## ### Example
+##
+## ~~~{sh}
+##     http_status_str 404
+##     # Not Found
+## ~~~
 ## @fn http_status_str()
 ##
 ## @param code Http status code
 ##
-## @return undefined
+## @return 0
 http_status_str() {
 	local code=$1 descr
 	case "$code" in

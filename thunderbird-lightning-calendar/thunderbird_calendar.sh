@@ -52,9 +52,6 @@ include() {
 	SOURCES
 }
 
-# Day;Week;Month;Year
-# First of;fod;fow;fom;foy
-# Last of;lod;low;lom;loy
 table_csv() {
 	local hdl top btm trm delim hd vd cr tcr bcr
 	delim=';'
@@ -180,6 +177,7 @@ null_print() {
 
 read_db() {
 	for dbfile in "$@"; do
+		false
 		sqlite3 "$dbfile" '
 			SELECT title, event_start, event_end, event_stamp
 				FROM cal_events 
@@ -267,7 +265,7 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 					end_ns="$(date -d "${pivot_date//./} $(parse_spec $offset) $(parse_spec $length) -1 second" +%s)999999"
 					((o++))
 				elif [[ "$arg" =~ ^($REG_STR)($REG_OFFSET)?(:$REG_LENGTH)?$ ]]; then
-					echo "${BASH_REMATCH[@]}"
+					# echo "${BASH_REMATCH[@]}"
 					pivot_date="${BASH_REMATCH[1]}"
 					case $pivot_date in
 						fow )
