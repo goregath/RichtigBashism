@@ -16,7 +16,8 @@ fi
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
-DB_BASE_DIR=~/.thunderbird/ivloaq67.default/calendar-data
+thdbrd_dirs=( ~/.thunderbird/*/calendar-data )
+DB_BASE_DIR="${thdbrd_dirs[0]}"
 UDAY_S=86400
 
 REG_YEAR="[1-9][0-9]{3}\.(0[1-9]|1[0-2])\.([0-2][0-9]|3[0-1])"
@@ -88,12 +89,47 @@ indent() {
 	sed -e 's/^/'"$(printf "%${1:-2}s")"'/'
 }
 
+## Trim leading and trailing whitespaces from variable.
+##
+## If a character is of the POSIX class _space_ it is considered as a whitespace.
+## The POSIX character class _space_ is defined as `[ \t\n\r\f\v]`.
+## @fn trim_var()
+##
+## @param name Name of variable
+##
+## @return undefined
+trim_var() {
+	local var="${!1}"
+	local padl=${var%%[![:space:]]*}
+	local padr=${var##*[![:space:]]}
+	var="${var#$padl}"
+	var="${var%$padr}"   
+	eval "$1=\"${var}\""
+}
+
+## First trim leading and trailing whitespaces by calling @ref trim_var
+## and then trim trailing "/" from variable.
+## @fn trim_path_var()
+##
+## @param name Name of variable
+##
+## @return undefined
+##
+## @see trim_var
+trim_path_var() {
+	trim_var $1
+	eval "$1=\"${!1%/}\""
+}
+
 help() {
 	cat >&2 <<-HLP
-	$exe [-d [DATE][OFFSET]:LENGTH] [-h]
-	  -d, --date    Query calendar around this date. 
-	                Defaults to today
-	  -h, --help    Display this message and exit
+	$exe [-b DIR] [-d [DATE][OFFSET]:LENGTH] [-f FMT] [-h]
+	  -b, --database-root   Directory of calendar data.
+	                        Defaults to \$HOME/.thunderbird/*/calendar-data
+	  -d, --date            Query calendar around this date. 
+	                        Defaults to today
+	  -f, --format          Chose output format
+	  -h, --help            Display this message and exit
 
 	  DATE    First form:  YYYY.MM.DD
 	          Second form: fo(w|m|y)
@@ -107,6 +143,9 @@ help() {
 	  LENGTH  [-|+]NUM[UNIT]
 	  NUM     A signed integer
 	  UNIT    y: Year, m: Month, w: Week, d: Day (default)
+
+	FORMAT:
+	  Supported formats are yad and raw (dash separated values).
 
 	OUTPUT:
 	  Each line on stdout contains a day with one or more events.
@@ -260,15 +299,31 @@ done
 include include/logger.sh
 include include/execution.sh
 
+export LOG_LEVEL=${LOG_LEVEL:-INFO}
+
 for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	opt="${!o}"
 	arg="${!a}"
 	case ${opt} in
 		-h|--help ) ;;
+		-b|--database-root ) 
+				trim_path_var arg
+				if [[ -d "$arg" ]]; then
+					DB_BASE_DIR="$arg"
+				else
+					log ERROR "$opt: invalid thunderbird directory"
+					exit 1
+				fi
+				((o++))
+			;;
 		-f|--format )
 				case $arg in
 					yad ) process() { process_db_out; }; ((o++)) ;;
 					raw ) process() { cat; }; get_events() { read_db "$@"; }; ((o++)) ;;
+					* )
+							log ERROR "$opt: invalid format"
+							exit 1
+						;;
 				esac
 			;;
 		-d|--date )
@@ -303,6 +358,7 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 				fi
 			;;
 		* )
+				log ERROR "invalid option '$opt'"
 				help 1
 			;;
 	esac

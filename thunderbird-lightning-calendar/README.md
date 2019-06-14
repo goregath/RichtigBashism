@@ -1,10 +1,13 @@
 # Read calender Thunderbird (Lightning)
 
 ```plain
-thunderbird_calendar.sh [-d [DATE][OFFSET]:LENGTH] [-h]
-  -d, --date    Query calendar around this date. 
-                Defaults to today
-  -h, --help    Display this message and exit
+thunderbird_calendar.sh [-b DIR] [-d [DATE][OFFSET]:LENGTH] [-f FMT] [-h]
+  -b, --database-root   Directory of calendar data.
+                        Defaults to $HOME/.thunderbird/*/calendar-data
+  -d, --date            Query calendar around this date. 
+                        Defaults to today
+  -f, --format          Chose output format
+  -h, --help            Display this message and exit
 
   DATE    First form:  YYYY.MM.DD
           Second form: fo(w|m|y)
@@ -19,6 +22,9 @@ thunderbird_calendar.sh [-d [DATE][OFFSET]:LENGTH] [-h]
   LENGTH  [-|+]NUM[UNIT]
   NUM     A signed integer
   UNIT    y: Year, m: Month, w: Week, d: Day (default)
+
+FORMAT:
+  Supported formats are yad and raw (dash separated values).
 
 OUTPUT:
   Each line on stdout contains a day with one or more events.
