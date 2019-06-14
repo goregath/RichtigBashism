@@ -6,11 +6,11 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-05-22 12:39:01
+## Last Modified time:  2019-06-14 13:19:58
 ## Last Modified by:    GoreGath
 
-[[ -n ${__LIB_LOGGER__+x} ]] && return 0
-__LIB_LOGGER__=y
+[[ -n ${__LIB_LOGGER__:+x} ]] && return 0
+export __LIB_LOGGER__=y
 
 ## If possible set color sequences to tags.
 ## Supported tags are:

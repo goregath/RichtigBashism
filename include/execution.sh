@@ -6,11 +6,11 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-05-22 12:46:33
+## Last Modified time:  2019-06-14 13:19:54
 ## Last Modified by:    GoreGath
 
-[[ -n ${__LIB_EXECUTION__+x} ]] && return 0
-__LIB_EXECUTION__=y
+[[ -n ${__LIB_EXECUTION__:+x} ]] && return 0
+export __LIB_EXECUTION__=y
 
 ## This function should be called right before the shell will exit.
 ## Its main purpose is to perform cleanup tasks.
@@ -25,8 +25,10 @@ __LIB_EXECUTION__=y
 ## @see setup()
 on_exit() {
 	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
-	log INFO "press enter to exit"
-	read || :
+	if [[ ${__LIB_EXECUTION_CONFIRM_ON_EXIT_:-x} == y ]]; then
+		log INFO "press enter to exit"
+		read || :
+	fi
 	if [[ $(LC_ALL=C type -t execution::teardown) == 'function' ]]; then
 		execution::teardown
 	else
@@ -114,6 +116,10 @@ on_error() {
 	log DEBUG "current directory: $PWD"
 	log DEBUG "machine: $MACHTYPE"
 	log DEBUG "bash: $BASH_VERSION"
+}
+
+execution::set_confirm_on_exit() {
+	export __LIB_EXECUTION_CONFIRM_ON_EXIT_=y
 }
 
 ## Setup shell environment and perform checks.
