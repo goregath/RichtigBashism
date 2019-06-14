@@ -9,6 +9,12 @@
 ## Last Modified time:  2019-06-14 13:19:54
 ## Last Modified by:    GoreGath
 
+# Copyright © 2019 github.com/goregath
+# This work is free. You can redistribute it and/or modify it under the
+# terms of the Do What The Fuck You Want To Public License, Version 2,
+# as published by Sam Hocevar. See the COPYING file or http://www.wtfpl.net/ 
+# for more details.
+
 [[ -n ${__LIB_EXECUTION__:+x} ]] && return 0
 export __LIB_EXECUTION__=y
 
