@@ -20,6 +20,14 @@ thunderbird_calendar.sh [-d [DATE][OFFSET]:LENGTH] [-h]
   NUM     A signed integer
   UNIT    y: Year, m: Month, w: Week, d: Day (default)
 
+OUTPUT:
+  Each line on stdout contains a day with one or more events.
+  Events start with one of the following marker:
+
+    [HH:MM] Local time
+    [~]     Continuous event (multiple days)
+    [=]     Whole day
+
 EXAMPLES:
   Query events starting one month before and after a date
   $ thunderbird_calendar.sh -d 2020.01.01-1m:2m
