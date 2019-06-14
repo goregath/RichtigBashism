@@ -114,6 +114,9 @@ help() {
 
 	  Query events for one weak starting at a date
 	  \$ $exe -d 2019.03.01:1w
+
+	  Query events for current month
+	  \$ $exe -d fom:1m
 	HLP
 	exit "${1}"
 }

@@ -26,6 +26,9 @@ EXAMPLES:
 
   Query events for one weak starting at a date
   $ thunderbird_calendar.sh -d 2019.03.01:1w
+
+  Query events for current month
+  $ thunderbird_calendar.sh -d fom:1m
 ```
 
 ```bash
