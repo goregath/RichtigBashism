@@ -1,2 +1,2 @@
 # RichtigBashism
-A random collection of bash scripts
+A random collection of bash scripts und utilities.
