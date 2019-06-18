@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-06-14 13:19:58
+## Last Modified time:  2019-06-18 15:25:54
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -137,7 +137,7 @@ logger::set_log_levels_desc() {
 ##
 ## @see set_log_levels_desc
 log() {
-	local _tag args i=$# ll=1 mi=2 rd=1
+	local _tag= args= i=$# ll=1 mi=2 rd=1
 	# supported levels in order of importance (desc)
 	for (( ; i > 0; --i )); do
 		if [[ "${!i}" == '--' ]]; then
@@ -149,7 +149,7 @@ log() {
 		fi
 	done
 
-	local ansi_ctl lvl="${!ll^^}" out prefix
+	local ansi_ctl= lvl="${!ll^^}" out prefix
 
 	if [[ -n ${LOG_LEVEL:+x} ]] \
 		&& ! [[ $LOG_LEVEL == $lvl ]] \
@@ -158,7 +158,6 @@ log() {
 		# skip log if lvl is lower than LOG_LEVEL
 		return
 	fi
-
 
 	case "$lvl" in
 		DEB*  )  rd=2; ;;
@@ -173,8 +172,6 @@ log() {
 			_tag=${_tag}[*]
 			_tag=( ${!_tag} )
 			_tag="$(printf '[%s] ' "${_tag[@]}")"
-		else
-			unset _tag
 		fi
 	fi
 

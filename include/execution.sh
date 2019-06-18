@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-06-14 13:19:54
+## Last Modified time:  2019-06-18 15:23:24
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -40,7 +40,6 @@ on_exit() {
 	else
 		log WARN 'missing execution::teardown()'
 	fi
-	exit ${code}
 }
 
 ## Print error summary for a previously failed command.
