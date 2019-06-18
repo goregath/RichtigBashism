@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-06-18 15:25:54
+## Last Modified time:  2019-06-18 15:32:00
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -172,6 +172,8 @@ log() {
 			_tag=${_tag}[*]
 			_tag=( ${!_tag} )
 			_tag="$(printf '[%s] ' "${_tag[@]}")"
+		else
+			_tag+=' '
 		fi
 	fi
 
