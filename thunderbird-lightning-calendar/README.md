@@ -6,8 +6,8 @@ thunderbird_calendar.sh [-b DIR] [-d [DATE][OFFSET]:LENGTH] [-f FMT] [-h]
                         Defaults to $HOME/.thunderbird/*/calendar-data
   -d, --date            Query calendar around this date. 
                         Defaults to today
-  -f, --format          Chose output format
-  -h, --help            Display this message and exit
+  -f, --format          Chose output format.
+  -h, --help            Display this message and exit.
 
   DATE    First form:  YYYY.MM.DD
           Second form: fo(w|m|y)

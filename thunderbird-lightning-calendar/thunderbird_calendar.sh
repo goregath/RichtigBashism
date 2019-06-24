@@ -6,7 +6,7 @@
 # as published by Sam Hocevar. See the COPYING file or http://www.wtfpl.net/ 
 # for more details.
 
-export LC_ALL=C
+declare -x LC_ALL=C
 
 if [[ -e "$0" ]]; then
 	exe=$(basename $0)
@@ -14,28 +14,25 @@ else
 	exe=calendar
 fi
 
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+declare -x LOG_LEVEL=${LOG_LEVEL:-ERROR}
 
-thdbrd_dirs=( ~/.thunderbird/*/calendar-data )
-DB_BASE_DIR="${thdbrd_dirs[0]}"
-UDAY_S=86400
+declare -r LENGTH_DEFAULT="+1"
+declare -r OFFSET_DEFAULT="+0"
+declare -r REG_LENGTH="[+-]?[1-9][0-9]*[dwmy]?"
+declare -r REG_OFFSET="[+-][1-9][0-9]*[dwmy]?"
+declare -r REG_STR="fo[wmy]"
+declare -r REG_YEAR="[1-9][0-9]{3}\.(0[1-9]|1[0-2])\.([0-2][0-9]|3[0-1])"
+declare -r SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+declare -r TAG_ENV=ENV
+declare -r TAG_IMPORT=IMPORT
+declare -r TAG_SRC=SRC
+declare -r UDAY_S=86400
 
-REG_YEAR="[1-9][0-9]{3}\.(0[1-9]|1[0-2])\.([0-2][0-9]|3[0-1])"
-REG_STR="fo[wmy]"
-REG_OFFSET="[+-][1-9][0-9]*[dwmy]?"
-REG_LENGTH="[+-]?[1-9][0-9]*[dwmy]?"
 
-OFFSET_DEFAULT="+0"
-LENGTH_DEFAULT="+1"
+declare -i begin_ns=0                # Do 01. Jan 00:00:00 UTC 1970
+declare -i end_ns=253402210800000000 # Fr 31. Dez 00:00:00 UTC 9999
 
-begin_ns=0           # Do 01. Jan 00:00:00 UTC 1970
-end_ns=253402210800000000 # Fr 31. Dez 00:00:00 UTC 9999
-raw=1
-
-# combine multiple tags by array
-TAG_IMPORT=( IMPORT )
-TAG_SRC=( SRC )
-TAG_ENV=( ENV )
+declare    db_base_dir="$( b=( ~/.thunderbird/*/calendar-data ); echo -n ${b[0]} )"
 
 include() {
 	search() {
@@ -53,6 +50,7 @@ include() {
 	lib="$1"
 	nl=$'\n'
 	search <<-SOURCES
+
 		.
 		${SCRIPTPATH}
 		${BASH_INCLUDES//:/$nl}
@@ -128,8 +126,8 @@ help() {
 	                        Defaults to \$HOME/.thunderbird/*/calendar-data
 	  -d, --date            Query calendar around this date. 
 	                        Defaults to today
-	  -f, --format          Chose output format
-	  -h, --help            Display this message and exit
+	  -f, --format          Chose output format.
+	  -h, --help            Display this message and exit.
 
 	  DATE    First form:  YYYY.MM.DD
 	          Second form: fo(w|m|y)
@@ -299,8 +297,6 @@ done
 include include/logger.sh
 include include/execution.sh
 
-export LOG_LEVEL=${LOG_LEVEL:-INFO}
-
 for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 	opt="${!o}"
 	arg="${!a}"
@@ -309,7 +305,7 @@ for (( o=1,a=2; o < $# + 1; ++o,a=o+1 )); do
 		-b|--database-root ) 
 				trim_path_var arg
 				if [[ -d "$arg" ]]; then
-					DB_BASE_DIR="$arg"
+					db_base_dir="$arg"
 				else
 					log ERROR "$opt: invalid thunderbird directory"
 					exit 1
@@ -367,4 +363,4 @@ done
 log INFO "BEGIN: $(date -d @"$((begin_ns / 1000000))")" >&2
 log INFO "END:   $(date -d @"$((end_ns / 1000000))")" >&2
 
-get_events ${DB_BASE_DIR}/{cache,local}.sqlite | process
+get_events ${db_base_dir}/{cache,local}.sqlite | process
