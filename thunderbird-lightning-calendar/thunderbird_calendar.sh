@@ -34,11 +34,27 @@ declare -i end_ns=253402210800000000 # Fr 31. Dez 00:00:00 UTC 9999
 
 declare    db_base_dir="$( b=( ~/.thunderbird/*/calendar-data ); echo -n ${b[0]} )"
 
+## Sources library by path.
+##
+## The usage is analogous to a C-like preprocessor `#include`.
+## The given path can either be absolute or relative. 
+## If the path is relative, the file is then resolved in the following order:
+##   1. Current working directory
+##   2. Directory of script @ref SCRIPTPATH
+##   3. All directories enumerated by @ref BASH_INCLUDES separated by `:` (colon).
+## @fn include()
+##
+## @param path Path to library
+##
+## @return Error (!0) if include could not be resolved or failed to include
+##
+## @see SCRIPT_PATH
+## @see BASH_INCLUDES
 include() {
 	search() {
 		local src is_included=1
 		while read -r src; do
-			if source "$src/$lib" 2>/dev/null; then
+			if [[ -s "$src/$lib" ]] && source "$src/$lib"; then
 				tag=src log INFO "included $src/$lib"
 				is_included=0
 				break
@@ -49,7 +65,7 @@ include() {
 	local lib nl
 	lib="$1"
 	nl=$'\n'
-	search <<-SOURCES
+	search "$1" <<-SOURCES
 
 		.
 		${SCRIPTPATH}
@@ -83,6 +99,14 @@ table_csv() {
 	}
 }
 
+## Indent stdin by n spaces
+## @fn indent()
+##
+## @param n Number of spaces to prepend before each line. Default: 2
+##
+## @param[out] stdout Indentent output
+##
+## @return As defined by sed
 indent() {
 	sed -e 's/^/'"$(printf "%${1:-2}s")"'/'
 }
@@ -119,6 +143,14 @@ trim_path_var() {
 	eval "$1=\"${!1%/}\""
 }
 
+## Display help text and exit.
+## @fn help()
+##
+## @param code Exit code
+##
+## @param[out] stderr Help text
+##
+## @return undefined
 help() {
 	cat >&2 <<-HLP
 	$exe [-b DIR] [-d [DATE][OFFSET]:LENGTH] [-f FMT] [-h]
@@ -166,6 +198,14 @@ help() {
 	exit "${1}"
 }
 
+## Parse value string and convert to date (GNU date) arithmetics.
+## @fn parse_spec()
+##
+## @param spac Value string, fmt.: [-|+]value[unit]
+##
+## @param[out] stdout Date operation
+##
+## @return 1 on invalid spec, else 0
 parse_spec() {
 	# [-|+]value[unit]
 	if [[ -z ${1:+x} ]]; then
@@ -193,14 +233,38 @@ parse_spec() {
 	fi
 }
 
+## Get day in seconds from unix timestamp.
+## @fn to_day_s()
+##
+## @param var_name Name of variable that holds the date in seconds
+##
+## @param[out] stdout Begin of day in seconds 
+##
+## @return As defined by date
 to_day_s() {
 	date -d "$(date -d @${!1} +%Y%m%d)" +%s
 }
 
+## Print date as DD.MM.YYYY .
+## @fn to_date()
+##
+## @param var_name Name of variable that holds the date in seconds
+##
+## @param[out] stdout Date, fmt.: DD.MM.YYYY
+##
+## @return As defined by date
 to_date() {
 	date -d @${!1} +%d.%m.%Y
 }
 
+## Print time of day as HH:MM .
+## @fn to_time()
+##
+## @param var_name Name of variable that holds the date in seconds
+##
+## @param[out] stdout Date, fmt.: HH:MM
+##
+## @return As defined by date
 to_time() {
 	date -d @${!1} +%H:%M
 }
