@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-06-26 09:48:30
+## Last Modified time:  2019-06-26 09:56:23
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -272,6 +272,13 @@ log() {
 	done
 }
 
+## Wrapper for function `log` to accept lines from stdin.
+## @fn log_stdin()
+##
+## @param level Logging level
+##
+## @see log
+## @return undefined
 log_stdin() {
 	while IFS= read -r l0 l1 l2 l3 l4 l5 l6 l7; do
 		log "$1" "$l0" "$l1" "$l2" "$l3" "$l4" "$l5" "$l6" "$l7"
