@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-06-26 09:56:23
+## Last Modified time:  2019-07-05 12:34:24
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -220,7 +220,7 @@ log() {
 		return
 	fi
 
-	case "$lvl" in
+	case "${lvl^^}" in
 		DEB*  )  rd=2; ;;
 		ERR*  )  rd=2; ansi_ctl="${MOD_BLD}${CLR_RED}" ;;
 		INFO* )  rd=2; ansi_ctl="${MOD_BLD}${CLR_CYN}" ;;
