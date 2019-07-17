@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-07-17 12:59:37
+## Last Modified time:  2019-07-17 15:10:26
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -23,14 +23,23 @@ __LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG ALL"
 if ! hash tput >/dev/null 2>&1; then
 	echo "[WARN] unable to fully setup logger: missing tput" >&2
 fi
-if ! hash hexdump >/dev/null 2>&1; then
-	echo "[ERROR] unable to init logger: missing hexdump" >&2
-	exit 1
-fi
-if ! hash xxd >/dev/null 2>&1; then
-	echo "[ERROR] unable to init logger: missing xxd" >&2
-	exit 1
-fi
+
+logger::encode() {
+	local LC_ALL=C
+	while (( ${#} > 0 )); do
+		for (( i = 0; i < ${#1}; i++ )); do
+			printf '%%%02X' "'${1:i:1}"
+		done
+		shift
+	done
+}
+
+logger::decode() {
+	while (( ${#} > 0 )); do
+		printf '%b' "${1//%/\\x}"
+		shift
+	done
+}
 
 ## If possible set color sequences to tags.
 ## Supported tags are:
@@ -75,16 +84,14 @@ __set_colors__() {
 					CLR_CYN="$($tput setaf 6)"
 					CLR_WHT="$($tput setaf 7)"
 					_ANSI_CTRL=( 
-						$(printf '%b' \
-						"$MOD_REV"'\0\0'"$MOD_BLD"'\0\0'\
-						"$MOD_UDL"'\0\0'"$MOD_STO"'\0\0'\
-						"$MOD_RST"'\0\0'\
-						"$CLR_BLK"'\0\0'"$CLR_RED"'\0\0'\
-						"$CLR_GRN"'\0\0'"$CLR_YLW"'\0\0'\
-						"$CLR_BLU"'\0\0'"$CLR_MGT"'\0\0'\
-						"$CLR_CYN"'\0\0'"$CLR_WHT" \
-						| hexdump -ve '1/1 "%.2X"'\
-						| sed -e 's/0000/ /g')
+						$(logger::encode \
+							"$MOD_REV" %20 "$MOD_BLD" %20 \
+							"$MOD_UDL" %20 "$MOD_STO" %20 \
+							"$MOD_RST" %20 \
+							"$CLR_BLK" %20 "$CLR_RED" %20 \
+							"$CLR_GRN" %20 "$CLR_YLW" %20 \
+							"$CLR_BLU" %20 "$CLR_MGT" %20 \
+							"$CLR_CYN" %20 "$CLR_WHT")
 					)
 				fi
 				;;
@@ -190,8 +197,6 @@ logger::disable_color_mode() {
 ##     # [INFO] Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonu >|
 ## ~~~
 ## @fn log()
-## @depends hexdump (bsdmainutils)
-## @depends xxd (vim-common)
 ##
 ## @param level Logging level
 ## @param ... Message args, each argument is printed as a new log line 
@@ -252,11 +257,11 @@ log() {
 			if [[ ${#_ANSI_CTRL[@]} != 0 ]]; then
 				local nesc
 				nesc=$(
-					hd="$(hexdump -ve '1/1 "%.2X"' <<<"$out")"
+					hd="$(logger::encode "$out")"
 					for m in ${_ANSI_CTRL[*]}; do
 						hd="${hd//$m/}"
 					done
-					str="$(xxd -r -p <<<"$hd")"
+					str="$(logger::decode "$hd")"
 					echo "${#str}"
 				)
 				nctl=$(( nout - nesc ))
