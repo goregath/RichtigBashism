@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-07-05 12:34:24
+## Last Modified time:  2019-07-17 12:59:37
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -21,16 +21,15 @@ export __LIB_LOGGER__=y
 __LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG ALL"
 
 if ! hash tput >/dev/null 2>&1; then
-	echo "[ERROR] unable to init logger: missing tput" >&2
-	return 1
+	echo "[WARN] unable to fully setup logger: missing tput" >&2
 fi
 if ! hash hexdump >/dev/null 2>&1; then
 	echo "[ERROR] unable to init logger: missing hexdump" >&2
-	return 1
+	exit 1
 fi
 if ! hash xxd >/dev/null 2>&1; then
 	echo "[ERROR] unable to init logger: missing xxd" >&2
-	return 1
+	exit 1
 fi
 
 ## If possible set color sequences to tags.
@@ -54,7 +53,7 @@ fi
 ##
 ## @return undefined
 __set_colors__() {
-	if [[ -t 1 ]]; then
+	if [[ -t 1 ]] && hash tput >/dev/null 2>&1; then
 		case "$TERM" in
 			xterm* ) ;&
 			rxvt* )
@@ -128,7 +127,10 @@ logger::set_log_levels_desc() {
 ## @fn logger::enable_column_mode()
 ## @return undefined
 logger::enable_column_mode()  {
-	shopt -s checkwinsize; tput cols >/dev/null
+	shopt -s checkwinsize
+	if hash tput >/dev/null 2>&1; then
+		tput cols >/dev/null
+	fi
 }
 
 ## @fn logger::disable_column_mode()
