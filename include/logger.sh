@@ -19,6 +19,7 @@
 export __LIB_LOGGER__=y
 
 __LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG ALL"
+__LIB_LOGGER_LVLS_WIDTH=5
 
 if ! hash tput >/dev/null 2>&1; then
 	echo "[WARN] unable to fully setup logger: missing tput" >&2
@@ -128,7 +129,14 @@ __unset_colors__() {
 ##
 ## @return 0
 logger::set_log_levels_desc() {
+	__LIB_LOGGER_LVLS_WIDTH=1
+	local -i w=1
 	__LIB_LOGGER_LVLS_="$@"
+	while (( $# )); do
+		(( w = ( ${#1} > w ? ${#1} : w) ))
+		shift
+	done
+	__LIB_LOGGER_LVLS_WIDTH=$w
 }
 
 ## @fn logger::enable_column_mode()
@@ -239,7 +247,7 @@ log() {
 		if [[ -n ${!_tag+x} ]]; then
 			_tag=${_tag}[*]
 			_tag=( ${!_tag} )
-			_tag="$(printf '[%s] ' "${_tag[@]}")"
+			_tag="$(printf '[ %s ] ' "${_tag[@]}")"
 		else
 			_tag+=' '
 		fi
@@ -249,7 +257,7 @@ log() {
 		if [[ -z ${!i:+x} ]]; then
 			continue
 		fi
-		prefix="[${lvl}] "
+		printf -v prefix '[%s%-'$__LIB_LOGGER_LVLS_WIDTH's%s] ' ' ' "$lvl" ' '
 		out="${ansi_ctl}${prefix}${_tag}${MOD_RST}${!i}"
 		while IFS= read -r out; do
 			local nctl nout
@@ -294,5 +302,6 @@ log_stdin() {
 
 export -f log log_stdin
 
+logger::set_log_levels_desc "ERROR" "WARN" "INFO" "DEBUG" "ALL"
 logger::disable_column_mode
 logger::disable_color_mode
