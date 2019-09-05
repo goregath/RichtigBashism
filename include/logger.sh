@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-07-17 15:10:26
+## Last Modified time:  2019-09-05 09:19:28
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -58,7 +58,6 @@ logger::decode() {
 ##   - CLR_CYN
 ##   - CLR_WHT
 ## @fn __set_colors__()
-## @depends hexdump (bsdmainutils)
 ## @depends tput (ncurses-bin)
 ##
 ## @return undefined
