@@ -6,7 +6,7 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-06-18 15:23:24
+## Last Modified time:  2019-09-10 16:26:30
 ## Last Modified by:    GoreGath
 
 # Copyright © 2019 github.com/goregath
@@ -30,7 +30,7 @@ export __LIB_EXECUTION__=y
 ##
 ## @see __setup__()
 on_exit() {
-	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "<unkown>"'  ERR
+	trap 'on_error "${BASH_SOURCE:-unknown}" $- $? $LINENO "<unkown>"'  ERR
 	if [[ ${__LIB_EXECUTION_CONFIRM_ON_EXIT_:-x} == y ]]; then
 		log INFO "press enter to exit"
 		read || :
@@ -110,7 +110,7 @@ on_error() {
 		sed() { cat; }
 	fi
 	for (( f=1, l=0; f < ${#FUNCNAME[@]}; f++,l++ )); do
-		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]}" "${BASH_SOURCE[$f]}:${BASH_LINENO[$l]}"
+		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]:-unknown}" "${BASH_SOURCE[$f]:-unknown}:${BASH_LINENO[$l]:-0}"
 		msg+="$dump"
 	done
 	tag=pid log ERROR "[$source]:"$'\n'"${command} on line $line failed with $code [$flags]${msg}"
@@ -135,7 +135,7 @@ __setup__() {
 	if [[ $(LC_ALL=C type -t log) != 'function' ]]; then
 		log() { echo "$@"; }
 	fi
-	trap 'on_error "$BASH_SOURCE" $- $? $LINENO "'\''$BASH_COMMAND'\''"' ERR
+	trap 'on_error "${BASH_SOURCE:-unknown}" $- $? ${LINENO:-0} "'\''${BASH_COMMAND:-unknown}'\''"' ERR
 	trap 'on_exit' EXIT
 	set -o pipefail
 	shopt -s extglob
