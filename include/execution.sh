@@ -6,8 +6,8 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 12:44:47
 ##
-## Last Modified time:  2019-09-10 16:26:30
-## Last Modified by:    GoreGath
+## Last Modified time:  2020-07-08 14:31:58
+## Last Modified by:    e3dc
 
 # Copyright © 2019 github.com/goregath
 # This work is free. You can redistribute it and/or modify it under the
@@ -78,9 +78,10 @@ on_exit() {
 ##     [DEBUG] bash: 4.3.11(1)-release
 ## ~~~
 ##
-## @depends grep
-## @depends column (bsdmainutils)
-## @depends sed
+## @depends
+##   @ref bin_grep
+## , @ref bin_column (bsdmainutils, optional)
+## , @ref bin_sed
 ##
 ## @fn on_error()
 ##
@@ -104,7 +105,7 @@ on_error() {
 	command="$5"
 	TAG_PID=( $$ ${BASHPID/#$$/} )
 	if ! hash column >/dev/null 2>&1; then
-		column() { cat -n; }
+		column() { cat; }
 	fi
 	if ! hash sed >/dev/null 2>&1; then
 		sed() { cat; }
@@ -113,14 +114,16 @@ on_error() {
 		printf -v dump '\n  %-24s [%s]' "${FUNCNAME[$f]:-unknown}" "${BASH_SOURCE[$f]:-unknown}:${BASH_LINENO[$l]:-0}"
 		msg+="$dump"
 	done
-	tag=pid log ERROR "[$source]:"$'\n'"${command} on line $line failed with $code [$flags]${msg}"
+	log TRACE "command failed:"$'\n'"$command" || :
+	# tag=pid log ERROR "line $line failed with $code [$flags]${msg}"
+	tag=pid log DEBUG "$source:$line failed with $code [$flags] in ${FUNCNAME[1]:-main}${msg}"
 	msg="$(set -o | grep 'on$' | column -t | sed 's/^/  /')"
-	log DEBUG "Bourne shell options:"$'\n'"${msg}"
+	log TRACE "Bourne shell options:"$'\n'"${msg}"
 	msg="$(shopt | grep 'on$' | column -t | sed 's/^/  /')"
-	log DEBUG "Bash options:"$'\n'"${msg}"
-	log DEBUG "current directory: $PWD"
-	log DEBUG "machine: $MACHTYPE"
-	log DEBUG "bash: $BASH_VERSION"
+	log TRACE "Bash options:"$'\n'"${msg}"
+	log TRACE "current directory: $PWD"
+	log TRACE "machine: $MACHTYPE"
+	log TRACE "bash: $BASH_VERSION"
 }
 
 execution::set_confirm_on_exit() {
@@ -128,6 +131,8 @@ execution::set_confirm_on_exit() {
 }
 
 ## Setup shell environment and perform checks.
+## @depends
+##   execution::setup()
 ## @fn __setup__()
 ##
 ## @return undefined
@@ -135,7 +140,9 @@ __setup__() {
 	if [[ $(LC_ALL=C type -t log) != 'function' ]]; then
 		log() { echo "$@"; }
 	fi
-	trap 'on_error "${BASH_SOURCE:-unknown}" $- $? ${LINENO:-0} "'\''${BASH_COMMAND:-unknown}'\''"' ERR
+	# allows up to 100 nested functions, limits recursion
+	FUNCNEST=100
+	trap 'on_error "${BASH_SOURCE[0]:-main}" $- $? ${LINENO:-0} "'\''${BASH_COMMAND:-unknown}'\''"' ERR
 	trap 'on_exit' EXIT
 	set -o pipefail
 	shopt -s extglob

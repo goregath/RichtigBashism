@@ -6,8 +6,13 @@
 ## @author              Oliver Zimmer <Oliver.Zimmer@e3dc.com>
 ## @date                2019-05-22 10:36:37
 ##
-## Last Modified time:  2019-09-05 09:19:28
-## Last Modified by:    GoreGath
+## Last Modified time:  2020-07-06 08:35:56
+## Last Modified by:    e3dc
+## 
+## @defgroup liblog Extended logging library
+## 
+## @addtogroup liblog
+## @{
 
 # Copyright © 2019 github.com/goregath
 # This work is free. You can redistribute it and/or modify it under the
@@ -16,15 +21,28 @@
 # for more details.
 
 [[ -n ${__LIB_LOGGER__:+x} ]] && return 0
+declare -x __LIB_LOGGER__
 export __LIB_LOGGER__=y
 
-__LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG ALL"
-__LIB_LOGGER_LVLS_WIDTH=5
+declare __LIB_LOGGER_LVLS_="ERROR WARN INFO DEBUG TRACE ALL"
+declare -i __LIB_LOGGER_LVLS_WIDTH=5
 
 if ! hash tput >/dev/null 2>&1; then
 	echo "[WARN] unable to fully setup logger: missing tput" >&2
 fi
 
+# tput() {
+# 	/usr/bin/tput "$@"
+# }
+
+## Encode character sequence to hex.
+## @fn logger::encode()
+##
+## @param str String to encode
+##
+## @param[out] stdout The encoded string
+##
+## @return undefined
 logger::encode() {
 	local LC_ALL=C
 	while (( ${#} > 0 )); do
@@ -35,6 +53,14 @@ logger::encode() {
 	done
 }
 
+## Encode hex to character sequence.
+## @fn logger::decode()
+##
+## @param hex The hex string
+##
+## @param[out] stdout The decoded string
+##
+## @return undefined
 logger::decode() {
 	while (( ${#} > 0 )); do
 		printf '%b' "${1//%/\\x}"
@@ -212,6 +238,7 @@ logger::disable_color_mode() {
 ##
 ## @see set_log_levels_desc
 log() {
+	trap '' DEBUG
 	local _tag= args= i=$# ll=1 mi=2 rd=1
 	# supported levels in order of importance (desc)
 	for (( ; i > 0; --i )); do
@@ -231,7 +258,7 @@ log() {
 		&& ! [[ "${__LIB_LOGGER_LVLS_%"${LOG_LEVEL}"*}" =~ "$lvl " ]]
 	then
 		# skip log if lvl is lower than LOG_LEVEL
-		return
+		return 0
 	fi
 
 	case "${lvl^^}" in
@@ -251,6 +278,16 @@ log() {
 			_tag+=' '
 		fi
 	fi
+
+	case "${LOG_LEVEL:-x}" in
+		DEBUG|TRACE|ALL )
+			: "${FUNCNAME[*]}"
+			: "${_#log* }"
+			: "${_#log* }"
+			: "${_%% *}"
+			_tag+="$_: ";
+			;;
+	esac
 
 	for (( i = mi; i < ${#@} + 1; i++ )); do
 		if [[ -z ${!i:+x} ]]; then
@@ -301,6 +338,8 @@ log_stdin() {
 
 export -f log log_stdin
 
-logger::set_log_levels_desc "ERROR" "WARN" "INFO" "DEBUG" "ALL"
+logger::set_log_levels_desc "ERROR" "WARN" "INFO" "DEBUG" "TRACE" "ALL"
 logger::disable_column_mode
 logger::disable_color_mode
+
+## @}
